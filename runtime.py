@@ -1,10 +1,6 @@
 import os
-import subprocess
-import time
 
 import sys
-
-import utils
 
 
 class Runtime:
@@ -45,7 +41,7 @@ class Runtime:
                 return False
 
             self._resource_provider = provider_instance.build_provider(file_system)
-            if self._resource_provider is None or not self._resource_provider:
+            if self._resource_provider is None or not self._resource_provider or not self._resource_provider.valid():
                 return False
 
         except Exception as ex:
@@ -66,4 +62,3 @@ class Runtime:
 
     def free_resource(self, ticket):
         self._resource_provider.return_resource(ticket)
-

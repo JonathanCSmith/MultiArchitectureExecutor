@@ -12,6 +12,7 @@ class ClusterProvider(ResourceProvider):
     _key_path = None
     _login_ip = None
     _submitter = None
+    __valid = True
 
     def __init__(self, json_data):
         self._username = json_data["cluster_user"]
@@ -19,11 +20,20 @@ class ClusterProvider(ResourceProvider):
         self._login_ip = json_data["login_ip"]
         self._submitter = json_data["submission_wrapper"]
 
+        # Allow passing of complete file paths or local
+        if not os.path.isfile(self._submitter):
+            self._submitter = os.path.join(os.path.dirname(os.path.realpath(__file__)), self._submitter)
+            if not os.path.isfile(self._submitter):
+                self._valid = False
+
     def acquire_resource(self, ticket):
         return ClusterConnection(self._username, self._key_path, self._login_ip, self._submitter)
 
     def return_resource(self, ticket):
         pass  # The connection self disposes
+
+    def valid(self):
+        return self.__valid
 
 
 class ClusterConnection(Resource):
@@ -54,7 +64,7 @@ class ClusterConnection(Resource):
                 "-sl=" + os.path.join(engine.get_file_system().get_working_directory(), execution_wrapper.get_script().replace(".", "-") + "_" + self.ip.replace(".", "-") + "_" + ticket + "_log.txt"),
                 "-el=" + os.path.join(engine.get_file_system().get_working_directory(), execution_wrapper.get_script().replace(".", "-") + "_" + self.ip.replace(".", "-") + "_" + ticket + "_err.txt"),
                 "-parameter_string=\"" + script_arguments + "\"",
-                "-remote=" + os.path.join(os.path.dirname(os.path.realpath(__file__)), self.submitter),
+                "-remote=" + self.submitter,
                 "-c=" + os.path.join(os.path.dirname(os.path.realpath(__file__)), "cluster_cleanup.sh"),
                 "-cf=" + os.path.join(os.path.dirname(os.path.realpath(__file__)), "fail_cluster_cleanup.sh")
             ],

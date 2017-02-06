@@ -36,6 +36,9 @@ class DistributedMachineProvider(ResourceProvider):
         vm = self.__checked_out.pop(ticket)
         self.__pool.append(vm)
 
+    def valid(self):
+        return True
+
 
 class Machine(Resource):
     username = None
