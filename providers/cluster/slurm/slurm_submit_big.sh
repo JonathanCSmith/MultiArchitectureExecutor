@@ -73,7 +73,7 @@ echo "> "
 # Execute our target script
 echo "=================================================================="
 echo "> Beginning script submission for ${SCRIPT} with parameters: '${PARAMETERS}'"
-JOB_ID=$(sbatch -o ${OUT} -e ${ERR} --open-mode=append --mem=224G --exclusive ${SCRIPT} ${PARAMETERS})
+JOB_ID=$(sbatch -o ${OUT} -e ${ERR} --open-mode=append --mem=0 --exclusive ${SCRIPT} ${PARAMETERS})
 JOB_ID=${JOB_ID##* }
 echo "Job ID: ${JOB_ID}"
 echo "Queueing the cleanup job: ${PASS_CLEANUP_SCRIPT} with the ticket: ${TICKET} and dependent on Job ID: ${JOB_ID}"
