@@ -31,7 +31,9 @@ esac
 done
 
 # Cleanup log if thats what we should be doing
-if [ "${CLEANUP_LOG}" == "True" ]; then
+echo "Cleanup log? : ${CLEANUP_LOG}"
+if [ "${CLEANUP_LOG}" = "True" ]; then
+    echo "Cleaning: ${OUT} and ${ERR}"
     rm ${OUT}
     rm ${ERR}
 fi
