@@ -54,6 +54,7 @@ def run(runtime_provider, source_directory, scripts_directory, pipeline_controll
         # Make a blind function call - we assume that the loaded script conforms to our standards. If not, we catch it
         engine.info("Attempting engine injection")
         if pipeline.execute_pipeline(engine):
+            file_system.cleanup_monitors()
             if no_exit:
                 engine.debug("Returning positive outcome: True")
                 return True
@@ -61,6 +62,7 @@ def run(runtime_provider, source_directory, scripts_directory, pipeline_controll
                 engine.debug("Returning positive outcome: 0")
                 sys.exit(0)
         else:
+            file_system.cleanup_monitors()
             if no_exit:
                 engine.debug("Returning negative outcome: False")
                 return False
@@ -72,3 +74,4 @@ def run(runtime_provider, source_directory, scripts_directory, pipeline_controll
         engine.error("Caught exception in pipeline delegate")
         engine.exception(ex)
         sys.exit(1)
+

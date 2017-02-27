@@ -1,5 +1,7 @@
 import os
 
+import shutil
+
 
 class FileSystem:
     _engine = None
@@ -58,3 +60,6 @@ class FileSystem:
 
     def set_output_directory(self, output_directory):
         self._output_directory = output_directory
+
+    def cleanup_monitors(self):
+        shutil.rmtree(self._monitor_directory)
