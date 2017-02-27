@@ -92,7 +92,7 @@ case ${i} in
 
 	# Cleanup log
 	-l=*)
-	CLEANUP_LOG="{i#*=}"
+	CLEANUP_LOG="${i#*=}"
 	shift
 	;;
 esac
