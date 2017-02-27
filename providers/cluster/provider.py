@@ -20,6 +20,15 @@ class ClusterProvider(ResourceProvider):
         self._login_ip = json_data["login_ip"]
         self._submitter = json_data["submission_wrapper"]
 
+        # Boolean log - decides whether logs are kept or not
+        if "logging_cleanup" in json_data:
+            self._log = json_data["logging_cleanup"]
+            if not isinstance(self._log, bool):
+                raise Exception("Cannot coerce logging cleanup parameter into a boolean. Please use the boolean json type.")
+
+        else:
+            self._log = False
+
         # Allow passing of complete file paths or local
         if not os.path.isfile(self._submitter):
             self._submitter = os.path.join(os.path.dirname(os.path.realpath(__file__)), self._submitter)
@@ -27,7 +36,7 @@ class ClusterProvider(ResourceProvider):
                 self._valid = False
 
     def acquire_resource(self, ticket):
-        return ClusterConnection(self._username, self._key_path, self._login_ip, self._submitter)
+        return ClusterConnection(self._username, self._key_path, self._login_ip, self._submitter, self._log)
 
     def return_resource(self, ticket):
         pass  # The connection self disposes
@@ -41,12 +50,14 @@ class ClusterConnection(Resource):
     key_path = None
     ip = None
     submitter = None
+    log = None
 
-    def __init__(self, username, key_path, ip, submitter):
+    def __init__(self, username, key_path, ip, submitter, log):
         self.username = username
         self.key_path = key_path
         self.ip = ip
         self.submitter = submitter
+        self.log = log
 
     def execute(self, engine, execution_wrapper, script_arguments, ticket):
         working_directory = engine.get_file_system().get_working_directory()
@@ -66,7 +77,8 @@ class ClusterConnection(Resource):
                 "-parameter_string=\"" + script_arguments + "\"",
                 "-remote=" + self.submitter,
                 "-c=" + os.path.join(os.path.dirname(os.path.realpath(__file__)), "cluster_cleanup.sh"),
-                "-cf=" + os.path.join(os.path.dirname(os.path.realpath(__file__)), "fail_cluster_cleanup.sh")
+                "-cf=" + os.path.join(os.path.dirname(os.path.realpath(__file__)), "fail_cluster_cleanup.sh"),
+                "-l=" + str(self.log)
             ],
             universal_newlines=True,
             stdout=subprocess.PIPE,
