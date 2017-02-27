@@ -11,13 +11,13 @@ case ${i} in
 	;;
 
 	# Out
-	-out=*)
+	-out_log=*)
 	OUT="${i#*=}"
 	shift
 	;;
 
 	# Err
-	-err=*)
+	-err_log=*)
 	ERR="${i#*=}"
 	shift
 	;;

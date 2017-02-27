@@ -61,6 +61,12 @@ case ${i} in
 	ERR="${i#*=}"
 	shift
 	;;
+
+	# Log cleanup
+	-l=*)
+	CLEANUP_LOG="${i#*=}"
+	shift
+	;;
 esac
 done
 
@@ -77,7 +83,7 @@ JOB_ID=$(sbatch -o ${OUT} -e ${ERR} --open-mode=append --mem=0 --exclusive --par
 JOB_ID=${JOB_ID##* }
 echo "Job ID: ${JOB_ID}"
 echo "Queueing the cleanup job: ${PASS_CLEANUP_SCRIPT} with the ticket: ${TICKET} and dependent on Job ID: ${JOB_ID}"
-sbatch -d afterok:${JOB_ID} --kill-on-invalid-dep=yes --output=/dev/null --error=/dev/null ${PASS_CLEANUP_SCRIPT} -ticket=${TICKET}
+sbatch -d afterok:${JOB_ID} --kill-on-invalid-dep=yes --output=/dev/null --error=/dev/null ${PASS_CLEANUP_SCRIPT} -ticket=${TICKET} -l=${CLEANUP_LOG} -out_log=${OUT} -err_log=${ERR}
 sbatch -d afternotok:${JOB_ID} --kill-on-invalid-dep=yes --output=/dev/null --error=/dev/null ${FAIL_CLEANUP_SCRIPT} -ticket=${TICKET}
 echo "=================================================================="
 echo ">"
