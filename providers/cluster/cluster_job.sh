@@ -89,6 +89,12 @@ case ${i} in
 	FAIL_CLEANUP_SCRIPT="${i#*=}"
 	shift
 	;;
+
+	# Cleanup log
+	-l=*)
+	CLEANUP_LOG="{i#*=}"
+	shift
+	;;
 esac
 done
 
@@ -103,7 +109,7 @@ echo "> Logs will be placed in ${LOG_OUT} and ${LOG_ERR}"
 cd ${WORKING_DIRECTORY}
 
 # Delegate the execution call to our scheduler specific interpreter
-${REMOTE_SCRIPT} -s=${SCRIPT} -t=${TICKET} -c=${CLEANUP_SCRIPT} -cf=${FAIL_CLEANUP_SCRIPT} -out="${LOG_OUT}" -err="${LOG_ERR}" -p="${PARAMETERS}"
+${REMOTE_SCRIPT} -s=${SCRIPT} -t=${TICKET} -c=${CLEANUP_SCRIPT} -cf=${FAIL_CLEANUP_SCRIPT} -out="${LOG_OUT}" -err="${LOG_ERR}" -l="${CLEANUP_LOG}" -p="${PARAMETERS}"
 echo "> SSH complete"
 echo "=================================================================="
 echo ">"
