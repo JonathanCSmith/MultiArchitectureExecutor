@@ -33,7 +33,7 @@ class Engine:
         logging.basicConfig(filename=log_file, filemode="w", level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p")
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%d/%m//%Y %I:%M:%S %p")
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%d/%m/%Y %I:%M:%S %p")
         ch.setFormatter(formatter)
         self._logger.addHandler(ch)
 
