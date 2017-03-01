@@ -64,6 +64,10 @@ class Engine:
         return self._file_system
 
     def submit_chunk_and_wait_for_execution(self, batch_size, chunk_size, execute_wrapper):
+        # Handle zero chunk sizes - allow 1 as it forces serial processing?!
+        if chunk_size == 0:
+            return self.submit_batch_and_wait_for_execution(batch_size, execute_wrapper)
+
         num_cycles = batch_size // chunk_size
         remainder = batch_size % chunk_size
 
