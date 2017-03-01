@@ -63,6 +63,72 @@ class Engine:
     def get_file_system(self):
         return self._file_system
 
+    def submit_chunk_and_wait_for_execution(self, batch_size, chunk_size, execute_wrapper):
+        num_cycles = batch_size // chunk_size
+        remainder = batch_size % chunk_size
+
+        for i in range(0, num_cycles):
+
+            # Batch indices
+            begin = i * chunk_size
+            end = (i + 1) * chunk_size
+
+            # Execute & wait
+            if self.__submit_chunk_for_execution(begin, end, execute_wrapper):
+                outcome = self.wait_for_execution()
+
+                # Exit if bad outcome - no point in continuing
+                if not outcome:
+                    return False
+
+            else:
+                return False
+
+        # Remainder
+        if remainder != 0:
+            begin = num_cycles * chunk_size
+            end = begin + remainder
+
+            if self.__submit_chunk_for_execution(begin, end, execute_wrapper):
+                outcome = self.wait_for_execution()
+
+                # Exit if bad outcome - no point continuing
+                if not outcome:
+                    return False
+
+            else:
+                return False
+
+        return True
+
+    def __submit_chunk_for_execution(self, begin, end, execute_wrapper):
+        if self._locked:
+            self.warning("Cannot execute a chunk as we are currently locked submitting or waiting.")
+            return False
+
+        self.info("Submitting a chunk from: " + str(begin) + " to: " + str(end) + " (exclusive of end) for execution.")
+        self._tickets.clear()
+
+        # Construct a new monitor - it has to be first, as otherwise we may be stuck queueing for resource without clearing it
+        self._build_monitor()
+
+        # Loop through the chunk
+        for i in range(begin, end):
+            completion_marker = str(uuid.uuid4())
+            self._tickets.append(completion_marker)
+            try:
+                if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, i)):
+                    return False
+
+            except Exception as ex:
+                self.error("Caught an exception whilst attempting to execute.")
+                self.error("Will force the program to exit!")
+                self._dead = True
+                time.sleep(10)  # Allow locks to resove and threads to die
+                raise ex
+
+        return True
+
     def submit_batch_and_wait_for_execution(self, batch_size, execute_wrapper):
         if self.__submit_batch_for_execution(batch_size, execute_wrapper):
             return self.wait_for_execution()
