@@ -30,7 +30,7 @@ class ClusterProvider(ResourceProvider):
             self._log = False
 
         # Allow passing of complete file paths or local
-        if not os.path.isfile(self._submitter):
+        if not isinstance(self._submitter, dict) and not os.path.isfile(self._submitter):
             self._submitter = os.path.join(os.path.dirname(os.path.realpath(__file__)), self._submitter)
             if not os.path.isfile(self._submitter):
                 self._valid = False
@@ -62,6 +62,27 @@ class ClusterConnection(Resource):
     def execute(self, engine, execution_wrapper, script_arguments, ticket):
         working_directory = engine.get_file_system().get_working_directory()
 
+        if isinstance(self.submitter, dict):
+            execution_script = None
+            if execution_wrapper.get_script() in self.submitter:
+                file = self.submitter[execution_wrapper.get_script()]
+                if not os.path.isfile(file):
+                    file = os.path.join(os.path.dirname(os.path.realpath(__file__)), file)
+                    if not os.path.isfile(file):
+                        raise Exception("Could not find the script identified for this file at: " + file)
+
+            elif "default" in self.submitter:
+                file = self.submitter[execution_wrapper.get_script()]
+                if not os.path.isfile(file):
+                    file = os.path.join(os.path.dirname(os.path.realpath(__file__)), file)
+                    if not os.path.isfile(file):
+                        raise Exception("Could not find the script identified for this file at: " + file)
+
+            else:
+                raise Exception("Could not find the script identified for this file")
+        else:
+            execution_script = self.submitter
+
         # Execute the above script
         p = subprocess.Popen(
             [
@@ -75,7 +96,7 @@ class ClusterConnection(Resource):
                 "-sl=" + os.path.join(engine.get_file_system().get_working_directory(), execution_wrapper.get_script().replace(".", "-") + "_" + self.ip.replace(".", "-") + "_" + ticket + "_log.txt"),
                 "-el=" + os.path.join(engine.get_file_system().get_working_directory(), execution_wrapper.get_script().replace(".", "-") + "_" + self.ip.replace(".", "-") + "_" + ticket + "_err.txt"),
                 "-parameter_string=\"" + script_arguments + "\"",
-                "-remote=" + self.submitter,
+                "-remote=" + execution_script,
                 "-c=" + os.path.join(os.path.dirname(os.path.realpath(__file__)), "cluster_cleanup.sh"),
                 "-cf=" + os.path.join(os.path.dirname(os.path.realpath(__file__)), "fail_cluster_cleanup.sh"),
                 "-l=" + str(self.log)
