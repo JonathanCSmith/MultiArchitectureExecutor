@@ -62,8 +62,8 @@ class ClusterConnection(Resource):
     def execute(self, engine, execution_wrapper, script_arguments, ticket):
         working_directory = engine.get_file_system().get_working_directory()
 
+        execution_script = None
         if isinstance(self.submitter, dict):
-            execution_script = None
             if execution_wrapper.get_script() in self.submitter:
                 file = self.submitter[execution_wrapper.get_script()]
                 if not os.path.isfile(file):
@@ -82,6 +82,13 @@ class ClusterConnection(Resource):
                 raise Exception("Could not find the script identified for this file")
         else:
             execution_script = self.submitter
+
+        try:
+            engine.info("Identified: " + execution_script + " as the target execution script.")
+
+        except Exception as ex:
+            engine.error("Error parsing the script reference")
+            engine.error(self.submitter)
 
         # Execute the above script
         p = subprocess.Popen(
