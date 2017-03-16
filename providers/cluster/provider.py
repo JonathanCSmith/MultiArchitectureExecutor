@@ -71,12 +71,16 @@ class ClusterConnection(Resource):
                     if not os.path.isfile(file):
                         raise Exception("Could not find the script identified for this file at: " + file)
 
+                execution_script = file
+
             elif "default" in self.submitter:
                 file = self.submitter[execution_wrapper.get_script()]
                 if not os.path.isfile(file):
                     file = os.path.join(os.path.dirname(os.path.realpath(__file__)), file)
                     if not os.path.isfile(file):
                         raise Exception("Could not find the script identified for this file at: " + file)
+
+                execution_script = file
 
             else:
                 raise Exception("Could not find the script identified for this file")
