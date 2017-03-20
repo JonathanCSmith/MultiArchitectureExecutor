@@ -74,7 +74,7 @@ class ClusterConnection(Resource):
                 execution_script = file
 
             elif "default" in self.submitter:
-                file = self.submitter[execution_wrapper.get_script()]
+                file = self.submitter["default"]
                 if not os.path.isfile(file):
                     file = os.path.join(os.path.dirname(os.path.realpath(__file__)), file)
                     if not os.path.isfile(file):
