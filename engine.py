@@ -117,6 +117,9 @@ class Engine:
         # Construct a new monitor - it has to be first, as otherwise we may be stuck queueing for resource without clearing it
         self._build_monitor()
 
+        # Call do before
+        execute_wrapper.do_before(self)
+
         # Loop through the chunk
         for i in range(begin, end):
             completion_marker = str(uuid.uuid4())
@@ -131,6 +134,9 @@ class Engine:
                 self._dead = True
                 time.sleep(10)  # Allow locks to resove and threads to die
                 raise ex
+
+        # Call do after
+        execute_wrapper.do_after(self)
 
         return True
 
@@ -151,6 +157,9 @@ class Engine:
         # Construct a new monitor - it has to be first, as otherwise we may be stuck queuing for resource without clearing it
         self._build_monitor()
 
+        # Call do before
+        execute_wrapper.do_before(self)
+
         # Loop through the requests
         for i in range(0, batch_size):
             completion_marker = str(uuid.uuid4())
@@ -165,6 +174,9 @@ class Engine:
                 self._dead = True
                 time.sleep(10)  # Allow locks to resove and threads to die
                 raise ex
+
+        # Call do after
+        execute_wrapper.do_after(self)
 
         return True
 
@@ -188,9 +200,15 @@ class Engine:
         # Construct a new monitor - it has to be first, as otherwise we may be stuck queuing for resource without clearing it
         self._build_monitor()
 
+        # Call do before
+        execute_wrapper.do_before(self)
+
         # Submit & Execute
         if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, 0)):
             return False
+
+        # Call do after
+        execute_wrapper.do_after(self)
 
         return True
 
