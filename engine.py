@@ -71,6 +71,9 @@ class Engine:
         num_cycles = batch_size // chunk_size
         remainder = batch_size % chunk_size
 
+        # Call do before
+        execute_wrapper.do_before(self)
+
         # Loop through complete cycles
         for i in range(0, num_cycles):
 
@@ -104,6 +107,9 @@ class Engine:
             else:
                 return False
 
+        # Call do after
+        execute_wrapper.do_after(self)
+
         return True
 
     def __submit_chunk_for_execution(self, begin, end, execute_wrapper):
@@ -116,9 +122,6 @@ class Engine:
 
         # Construct a new monitor - it has to be first, as otherwise we may be stuck queueing for resource without clearing it
         self._build_monitor()
-
-        # Call do before
-        execute_wrapper.do_before(self)
 
         # Loop through the chunk
         for i in range(begin, end):
@@ -134,9 +137,6 @@ class Engine:
                 self._dead = True
                 time.sleep(10)  # Allow locks to resove and threads to die
                 raise ex
-
-        # Call do after
-        execute_wrapper.do_after(self)
 
         return True
 
