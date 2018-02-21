@@ -62,4 +62,4 @@ class FileSystem:
         self._output_directory = output_directory
 
     def cleanup_monitors(self):
-        shutil.rmtree(self._monitor_directory)
+        shutil.rmtree(self._monitor_directory, ignore_errors=True)
