@@ -3,6 +3,7 @@ import os
 import threading
 import time
 import uuid
+import copy
 
 
 class Engine:
@@ -231,6 +232,7 @@ class Engine:
 
         # Special case where the script is telling us to skip this one
         if script_arguments is None:
+            self._tickets.remove(completion_marker)
             return True
 
         resource = self._runtime.acquire_resource(completion_marker)
@@ -246,8 +248,8 @@ class Engine:
         processing = True
         while processing and not self._dead:
             pass_through = True
-            copy = self._tickets
-            for ticket in copy:
+            tickets_copy = copy.deepcopy(self._tickets)
+            for ticket in tickets_copy:
                 if not os.path.exists(os.path.join(self._file_system.get_monitor_directory(), ticket + ".txt")):
                     if os.path.exists(os.path.join(self._file_system.get_monitor_directory(), ticket + "_fail.txt")):
                         self.error("Delegate " + ticket + " failed.")
