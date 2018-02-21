@@ -46,12 +46,6 @@ class ClusterProvider(ResourceProvider):
 
 
 class ClusterConnection(Resource):
-    username = None
-    key_path = None
-    ip = None
-    submitter = None
-    log = None
-
     def __init__(self, username, key_path, ip, submitter, log):
         self.username = username
         self.key_path = key_path

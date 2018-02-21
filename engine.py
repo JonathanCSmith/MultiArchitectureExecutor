@@ -229,6 +229,10 @@ class Engine:
         if not self._monitor_thread.is_alive():
             return False
 
+        # Special case where the script is telling us to skip this one
+        if script_arguments is None:
+            return True
+
         resource = self._runtime.acquire_resource(completion_marker)
         return resource.execute(self, execute_wrapper, script_arguments, completion_marker)
 
