@@ -133,7 +133,7 @@ class Engine:
 
         # Loop through the chunk
         for i in range(begin, end):
-            completion_marker = self.get_file_system()
+            completion_marker = self.generate_unique_uuid()
             self._tickets.append(completion_marker)
             try:
                 if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, i)):
@@ -202,7 +202,7 @@ class Engine:
         # Build an execution lock
         self.info("Submitting a script for execution")
         self._tickets.clear()
-        completion_marker = self.get_file_system()
+        completion_marker = self.generate_unique_uuid()
         self._tickets.append(completion_marker)
 
         # Construct a new monitor - it has to be first, as otherwise we may be stuck queuing for resource without clearing it
