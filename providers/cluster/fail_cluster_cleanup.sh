@@ -14,6 +14,8 @@ done
 
 file="${TICKET%.*}"
 
+# status
+echo "job failed"
 
 # Let's build the reporter that will inform our monitors of our completion
 echo "=================================================================="

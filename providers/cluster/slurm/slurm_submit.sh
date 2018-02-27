@@ -83,8 +83,8 @@ JOB_ID=$(sbatch -o ${OUT} -e ${ERR} --open-mode=append --mem=32G ${SCRIPT} ${PAR
 JOB_ID=${JOB_ID##* }
 echo "Job ID: ${JOB_ID}"
 echo "Queueing the cleanup job: ${PASS_CLEANUP_SCRIPT} with the ticket: ${TICKET} and dependent on Job ID: ${JOB_ID}"
-sbatch -d afterok:${JOB_ID} --kill-on-invalid-dep=yes --output=/dev/null --error=/dev/null ${PASS_CLEANUP_SCRIPT} -ticket=${TICKET} -l=${CLEANUP_LOG} -out_log=${OUT} -err_log=${ERR}
-sbatch -d afternotok:${JOB_ID} --kill-on-invalid-dep=yes --output=/dev/null --error=/dev/null ${FAIL_CLEANUP_SCRIPT} -ticket=${TICKET}
+sbatch -d afterok:${JOB_ID} --kill-on-invalid-dep=yes --open-mode=append -o ${OUT} -e ${ERR} ${PASS_CLEANUP_SCRIPT} -ticket=${TICKET} -l=${CLEANUP_LOG} -out_log=${OUT} -err_log=${ERR}
+sbatch -d afternotok:${JOB_ID} --kill-on-invalid-dep=yes --open-mode=append -o ${OUT} -e ${ERR} ${FAIL_CLEANUP_SCRIPT} -ticket=${TICKET}
 echo "=================================================================="
 echo ">"
 echo "=================================================================="

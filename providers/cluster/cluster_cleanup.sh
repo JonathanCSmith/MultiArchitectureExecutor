@@ -30,6 +30,9 @@ case ${i} in
 esac
 done
 
+# status
+echo "job succeeded"
+
 # Cleanup log if thats what we should be doing
 echo "Cleanup log? : ${CLEANUP_LOG}"
 if [ "${CLEANUP_LOG}" = "True" ]; then
