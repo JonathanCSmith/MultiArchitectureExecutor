@@ -278,6 +278,10 @@ class Engine:
                     processing = False
 
             else:
+                # Inform which tickets we are still waiting for
+                for ticket in self._tickets:
+                    self.debug("Still awaiting: " + ticket)
+
                 time.sleep(60)
 
         self._locked = False
