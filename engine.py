@@ -64,6 +64,13 @@ class Engine:
     def get_file_system(self):
         return self._file_system
 
+    def generate_unique_uuid(self):
+        completion_marker = str(uuid.uuid4())
+        while completion_marker in self._tickets:
+            completion_marker = str(uuid.uuid4())
+
+        return completion_marker
+
     def submit_chunk_and_wait_for_execution(self, batch_size, chunk_size, execute_wrapper):
         # Handle zero chunk sizes - allow 1 as it forces serial processing?!
         if chunk_size == 0:
@@ -126,7 +133,7 @@ class Engine:
 
         # Loop through the chunk
         for i in range(begin, end):
-            completion_marker = str(uuid.uuid4())
+            completion_marker = self.get_file_system()
             self._tickets.append(completion_marker)
             try:
                 if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, i)):
@@ -163,7 +170,7 @@ class Engine:
 
         # Loop through the requests
         for i in range(0, batch_size):
-            completion_marker = str(uuid.uuid4())
+            completion_marker = self.generate_unique_uuid()
             self._tickets.append(completion_marker)
             try:
                 if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, i)):
@@ -195,7 +202,7 @@ class Engine:
         # Build an execution lock
         self.info("Submitting a script for execution")
         self._tickets.clear()
-        completion_marker = str(uuid.uuid4())
+        completion_marker = self.get_file_system()
         self._tickets.append(completion_marker)
 
         # Construct a new monitor - it has to be first, as otherwise we may be stuck queuing for resource without clearing it
