@@ -38,6 +38,11 @@ done
 
 # status
 OUTCOME=$(sacct -j ${JOB_ID}.batch -P --format="State" | sed -n 2p)
+if [ -z "OUTCOME" ]; then
+    sleep 30
+    OUTCOME=$(sacct -j ${JOB_ID}.batch -P --format="State" | sed -n 2p)
+fi
+
 echo "OUTCOME = $OUTCOME"
 if [ "$OUTCOME" == "COMPLETED" ]; then
     echo "job succeeded"
