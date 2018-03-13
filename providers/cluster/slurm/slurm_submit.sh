@@ -89,11 +89,11 @@ fi
 JOB_ID=${JOB_ID##* }
 echo "Job ID: ${JOB_ID}"
 
-OUTPUT=$(sbatch -d afterany:${JOB_ID} --kill-on-invalid-dep=yes --open-mode=append -o ${OUT} -e ${ERR} ${CLEANUP_SCRIPT} -ticket=${TICKET} -l=${CLEANUP_LOG} -j=${JOB_ID} -out_log=${OUT} -err_log=${ERR})
+OUTPUT=$(sbatch -d afterany:${JOB_ID} --kill-on-invalid-dep=yes --open-mode=append -o ${OUT} -e ${ERR} ${PASS_CLEANUP_SCRIPT} -ticket=${TICKET} -l=${CLEANUP_LOG} -j=${JOB_ID} -out_log=${OUT} -err_log=${ERR})
 if [[ $OUTPUT = *"error"* ]]; then
     echo "Error when submitting bash job. Retrying in 10 seconds"
     sleep 10
-    OUTPUT=$(sbatch -d afterany:${JOB_ID} --kill-on-invalid-dep=yes --open-mode=append -o ${OUT} -e ${ERR} ${CLEANUP_SCRIPT} -ticket=${TICKET} -l=${CLEANUP_LOG} -j=${JOB_ID} -out_log=${OUT} -err_log=${ERR})
+    OUTPUT=$(sbatch -d afterany:${JOB_ID} --kill-on-invalid-dep=yes --open-mode=append -o ${OUT} -e ${ERR} ${PASS_CLEANUP_SCRIPT} -ticket=${TICKET} -l=${CLEANUP_LOG} -j=${JOB_ID} -out_log=${OUT} -err_log=${ERR})
 fi
 echo "=================================================================="
 echo ">"
