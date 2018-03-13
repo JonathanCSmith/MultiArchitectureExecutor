@@ -46,6 +46,14 @@ if [ "$OUTCOME" == "COMPLETED" ]; then
     echo "> Creating monitor file: ${TICKET}"
     touch ${TICKET}
     echo "=================================================================="
+elif [ "$OUTCOME" == "COMPLETING" ]; then
+    echo "job succeeded"
+
+    # Let's build the reporter that will inform our monitors of our completion
+    echo "=================================================================="
+    echo "> Creating monitor file: ${TICKET}"
+    touch ${TICKET}
+    echo "=================================================================="
 else
     # status
     echo "job failed"
