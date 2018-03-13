@@ -27,11 +27,37 @@ case ${i} in
 	CLEANUP_LOG="${i#*=}"
 	shift
 	;;
+
+	# Job
+	-j=*)
+	JOB_ID="${i#*=}"
+	shift
+	;;
 esac
 done
 
 # status
-echo "job succeeded"
+OUTCOME=$(sacct -j ${JOB_ID}.batch -P --format="State" | sed -n 2p)
+if [ "$OUTCOME" == "COMPLETED" ]; then
+    echo "job succeeded"
+
+    # Let's build the reporter that will inform our monitors of our completion
+    echo "=================================================================="
+    echo "> Creating monitor file: ${TICKET}"
+    touch ${TICKET}
+    echo "=================================================================="
+else
+    # status
+    echo "job failed"
+
+    # Let's build the reporter that will inform our monitors of our completion
+    echo "=================================================================="
+    echo "> Creating monitor file: ${TICKET}"
+    file="${TICKET%.*}"
+    touch "${file}_fail.txt"
+    echo "=================================================================="
+fi
+
 
 # Cleanup log if thats what we should be doing
 echo "Cleanup log? : ${CLEANUP_LOG}"
@@ -41,8 +67,3 @@ if [ "${CLEANUP_LOG}" = "True" ]; then
     rm ${ERR}
 fi
 
-# Let's build the reporter that will inform our monitors of our completion
-echo "=================================================================="
-echo "> Creating monitor file: ${TICKET}"
-touch ${TICKET}
-echo "=================================================================="

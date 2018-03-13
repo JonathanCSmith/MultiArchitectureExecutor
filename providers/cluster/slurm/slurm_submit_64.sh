@@ -79,11 +79,11 @@ echo "> "
 # Execute our target script
 echo "=================================================================="
 echo "> Beginning script submission for ${SCRIPT} with parameters: '${PARAMETERS}'"
-JOB_ID=$(sbatch -o ${OUT} -e ${ERR} --open-mode=append --mem=32G ${SCRIPT} ${PARAMETERS})
+JOB_ID=$(sbatch -o ${OUT} -e ${ERR} --open-mode=append --mem=64G ${SCRIPT} ${PARAMETERS})
 if [[ $JOB_ID = *"error"* ]]; then
     echo "Error when submitting bash job. Retrying in 10 seconds"
     sleep 10
-    JOB_ID=$(sbatch -o ${OUT} -e ${ERR} --open-mode=append --mem=32G ${SCRIPT} ${PARAMETERS})
+    JOB_ID=$(sbatch -o ${OUT} -e ${ERR} --open-mode=append --mem=64G ${SCRIPT} ${PARAMETERS})
 fi
 
 JOB_ID=${JOB_ID##* }
