@@ -95,6 +95,8 @@ if [[ "$OUTPUT" =~ *"error"* ]]; then
     sleep 10
     OUTPUT=$(sbatch -d afterany:${JOB_ID} --kill-on-invalid-dep=yes --open-mode=append -o ${OUT} -e ${ERR} ${PASS_CLEANUP_SCRIPT} -ticket=${TICKET} -l=${CLEANUP_LOG} -j=${JOB_ID} -out_log=${OUT} -err_log=${ERR})
 fi
+OUTPUT=${OUTPUT##* }
+echo "Cleanup ID: ${OUTPUT}"
 echo "=================================================================="
 echo ">"
 echo "=================================================================="
