@@ -39,14 +39,14 @@ done
 # status
 OUTCOME=$(sacct -j ${JOB_ID}.batch -P --format="State" | sed -n 2p)
 if [ -z "${OUTCOME// }" ]; then
-    echo "Retrieved outcome: , sleeping and retrying"
+    echo "Retrieved outcome: $OUTCOME, sleeping and retrying"
     sleep 60
     OUTCOME=$(sacct -j ${JOB_ID}.batch -P --format="State" | sed -n 2p)
 fi
 
 echo "OUTCOME = $OUTCOME"
 if [ "$OUTCOME" == "RUNNING" ]; then
-    echo "Retrieved outcome: , sleeping and retrying"
+    echo "Retrieved outcome: $OUTCOME, sleeping and retrying"
     sleep 60
     OUTCOME=$(sacct -j ${JOB_ID}.batch -P --format="State" | sed -n 2p)
 fi
