@@ -8,6 +8,9 @@ class ResourceProvider:
     def valid(self):
         pass
 
+    def supports_array(self):
+        return False
+
 
 class Resource:
     def execute(self, engine, execution_wrapper, script_arguments, ticket):

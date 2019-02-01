@@ -62,3 +62,6 @@ class Runtime:
 
     def free_resource(self, ticket):
         self._resource_provider.return_resource(ticket)
+
+    def supports_array(self):
+        return self._resource_provider.supports_array();

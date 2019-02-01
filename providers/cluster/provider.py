@@ -120,6 +120,13 @@ class ClusterConnection(Resource):
 
         return True
 
+    def execute_array(self, engine, execution_wrapper, begin, end, completion_marker):
+        # TODO: Gather all params & serialize into doc
+        # TODO: Write doc to wd
+        # TODO: submit array job that acts on array wrapper with parameters like - real job to do in array.
+        # TODO: Array wrapper should read serialized vars by line index and pipe them to real job
+        pass
+
 
 def build_provider(file_system):
     # Load our properties file

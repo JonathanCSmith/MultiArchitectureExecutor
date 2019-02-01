@@ -71,6 +71,28 @@ class Engine:
 
         return completion_marker
 
+    def submit_and_wait_for_execution(self, execute_wrapper):
+        return self.submit_batch_and_wait_for_execution(1, execute_wrapper)
+
+    def submit_batch_and_wait_for_execution(self, batch_size, execute_wrapper):
+        # Call do before
+        execute_wrapper.do_before(self)
+
+        if self.__submit_chunk_for_execution(0, batch_size, execute_wrapper):
+            outcome = self.wait_for_execution()
+
+            # Exit if bad outcome - no point continuing
+            if not outcome:
+                return False
+
+        else:
+            return False
+
+        # Call do after
+        execute_wrapper.do_after(self)
+
+        return True
+
     def submit_chunk_and_wait_for_execution(self, batch_size, chunk_size, execute_wrapper):
         # Handle zero chunk sizes - allow 1 as it forces serial processing?!
         if chunk_size == 0:
@@ -131,92 +153,26 @@ class Engine:
         # Construct a new monitor - it has to be first, as otherwise we may be stuck queueing for resource without clearing it
         self._build_monitor()
 
+        # Delegate to array job if possible?
+        if self._runtime.supports_array():
+            completion_marker = self.generate_unique_uuid()
+            return self._execute_array(execute_wrapper, completion_marker, begin, end - 1)
+
         # Loop through the chunk
-        for i in range(begin, end):
-            completion_marker = self.generate_unique_uuid()
-            self._tickets.append(completion_marker)
-            try:
-                if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, i)):
-                    return False
+        else:
+            for i in range(begin, end):
+                completion_marker = self.generate_unique_uuid()
+                self._tickets.append(completion_marker)
+                try:
+                    if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, i)):
+                        return False
 
-            except Exception as ex:
-                self.error("Caught an exception whilst attempting to execute.")
-                self.error("Will force the program to exit!")
-                self._dead = True
-                time.sleep(10)  # Allow locks to resove and threads to die
-                raise ex
-
-        return True
-
-    def submit_batch_and_wait_for_execution(self, batch_size, execute_wrapper):
-        if self.__submit_batch_for_execution(batch_size, execute_wrapper):
-            return self.wait_for_execution()
-
-        return False
-
-    def __submit_batch_for_execution(self, batch_size, execute_wrapper):
-        if self._locked:
-            self.warning("Cannot execute a batch as we are currently locked submitting or waiting")
-            return False
-
-        self.info("Submitting a batch of " + str(batch_size) + " for execution")
-        self._tickets.clear()
-
-        # Construct a new monitor - it has to be first, as otherwise we may be stuck queuing for resource without clearing it
-        self._build_monitor()
-
-        # Call do before
-        execute_wrapper.do_before(self)
-
-        # Loop through the requests
-        for i in range(0, batch_size):
-            completion_marker = self.generate_unique_uuid()
-            self._tickets.append(completion_marker)
-            try:
-                if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, i)):
-                    return False
-
-            except Exception as ex:
-                self.error("Caught an exception whilst attempting to execute.")
-                self.error("Will force the program to exit!")
-                self._dead = True
-                time.sleep(10)  # Allow locks to resove and threads to die
-                raise ex
-
-        # Call do after
-        execute_wrapper.do_after(self)
-
-        return True
-
-    def submit_and_wait_for_execution(self, execute_wrapper):
-        if self.__submit_for_execution(execute_wrapper):
-            return self.wait_for_execution()
-
-        return False
-
-    def __submit_for_execution(self, execute_wrapper):
-        if self._locked:
-            self.warning("Cannot execute whilst we are currently locked submitting or waiting")
-            return False
-
-        # Build an execution lock
-        self.info("Submitting a script for execution")
-        self._tickets.clear()
-        completion_marker = self.generate_unique_uuid()
-        self._tickets.append(completion_marker)
-
-        # Construct a new monitor - it has to be first, as otherwise we may be stuck queuing for resource without clearing it
-        self._build_monitor()
-
-        # Call do before
-        execute_wrapper.do_before(self)
-
-        # Submit & Execute
-        if not self._execute(execute_wrapper, completion_marker, script_arguments=execute_wrapper.map_arguments(self, 0)):
-            return False
-
-        # Call do after
-        execute_wrapper.do_after(self)
+                except Exception as ex:
+                    self.error("Caught an exception whilst attempting to execute.")
+                    self.error("Will force the program to exit!")
+                    self._dead = True
+                    time.sleep(10)  # Allow locks to resove and threads to die
+                    raise ex
 
         return True
 
@@ -244,6 +200,14 @@ class Engine:
 
         resource = self._runtime.acquire_resource(completion_marker)
         return resource.execute(self, execute_wrapper, script_arguments, completion_marker)
+
+    def _execute_array(self, execute_wrapper, completion_marker, begin, end):
+        # You cannot execute without a monitor, this prevents resources from being acquired without the ability to recover them.
+        if not self._monitor_thread.is_alive():
+            return False
+
+        resource = self._runtime.acquire_resource(completion_marker)
+        return resource.execute_array(self, execute_wrapper, begin, end, completion_marker)
 
     def _build_monitor(self):
         self._monitor_thread = threading.Thread(target=self._monitor)
