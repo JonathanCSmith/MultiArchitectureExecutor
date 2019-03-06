@@ -12,6 +12,16 @@ class FileSystem:
     _output_directory = None
 
     def __init__(self, source_directory, working_directory=None, scripts_directory=None, output_directory=None):
+        # Handle relative to absolute directory conversion
+        if not os.path.isabs(source_directory):
+            source_directory = os.path.abspath(source_directory)
+
+        if not os.path.isabs(working_directory):
+            working_directory = os.path.abspath(working_directory)
+
+        if not os.path.isabs(output_directory):
+            output_directory = os.path.abspath(output_directory)
+
         self._source_directory = source_directory
 
         # Set the working directory if it was specified
