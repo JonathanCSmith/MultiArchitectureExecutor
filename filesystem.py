@@ -50,6 +50,8 @@ class FileSystem:
         else:
             self._output_directory = self._working_directory
 
+        self._engine.info("Setup file system for source directory: " + self._source_directory + ", working directory: " + self._working_directory + ", output directory: " + self._output_directory)
+
     def set_engine(self, engine):
         self._engine = engine
 

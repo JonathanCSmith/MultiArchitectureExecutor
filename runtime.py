@@ -18,6 +18,7 @@ class Runtime:
 
         # Evaluate the provider
         if not provider or not os.path.exists(provider):
+            self._engine.warn("The provider was missing - attempting to find it local to your working folder.")
             new_provider = os.path.join(file_system.get_working_directory(), "provider.py")
             if not os.path.exists(new_provider):
                 self._engine.error("No valid path to a resource provider. Looked for: " + provider + " and " + new_provider)
@@ -42,6 +43,7 @@ class Runtime:
 
             self._resource_provider = provider_instance.build_provider(file_system)
             if self._resource_provider is None or not self._resource_provider or not self._resource_provider.valid():
+                self._engine.error("Could not create the runtime provider")
                 return False
 
         except Exception as ex:

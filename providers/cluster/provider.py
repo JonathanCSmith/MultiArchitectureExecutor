@@ -8,17 +8,25 @@ from providers.Resources import ResourceProvider, Resource
 
 
 class ClusterProvider(ResourceProvider):
-    _username = None
-    _key_path = None
-    _login_ip = None
-    _submitter = None
+    _username = ""
+    _key_path = ""
+    _login_ip = ""
+    _submitter = ""
     __valid = True
 
     def __init__(self, json_data):
-        self._username = json_data["cluster_user"]
-        self._key_path = json_data["cluster_key"]
-        self._login_ip = json_data["login_ip"]
-        self._submitter = json_data["submission_wrapper"]
+        self._submitter = os.path.join(os.path.dirname(os.path.realpath(__file__)), "slurm", "slurm_submit.sh")
+        if "cluster_user" in json_data:
+            self._username = json_data["cluster_user"]
+
+        if "cluster_key" in json_data:
+            self._key_path = json_data["cluster_key"]
+
+        if "login_ip" in json_data:
+            self._login_ip = json_data["login_ip"]
+
+        if "submission_wrapper" in json_data:
+            self._submitter = json_data["submission_wrapper"]
 
         # Boolean log - decides whether logs are kept or not
         if "logging_cleanup" in json_data:
